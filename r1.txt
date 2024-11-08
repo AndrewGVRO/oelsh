@@ -1,0 +1,120 @@
+Работа 1. Управление правами дотсупа к объектам ОС Linux
+Цель: изучить команды ОС и принципы разграничения доступак файловой системе
+
+Содание нового пользователя в системе:
+
+student@alexander-VirtualBox:-$ sudo useradd -m -s /bin/bash temp11
+
+Просмотр информкации о пользоватлях:
+student@alexander-VirtualBox:-$ vim /etc/passwd
+
+Просмотр инофрмации о группах:
+student@alexander-VirtualBox:-$ /etc/group
+
+Просмотр инофрмации информации о теневых паролях(для root):
+student@alexander-VirtualBox:-$ vim /etc/shdadow
+
+росмотр инфомрации о паролях групп (для root):
+student@alexander-VirtualBox:-$ vim /etc/qshadow
+
+Изменение пароля для ползователя для root:
+sudo passwd <имя пользователя>
+sudo passwd temp11
+
+Переключение на другого пользователя:
+su temp11
+
+Смена группы пользователя:
+newgrp <имя группы>
+newgrp tempgrp
+
+Выход из текущей гурппы (если работаем в новой):
+exit
+
+При переключении в новую группу объекты,создани которых разрешено пользователю, создаются от имени пользователя и от именого новой группы.
+-rw-rw-r-- 1 temp11 temp11     0 ноя  8 14:35 f2
+-rw-rw-r-- 1 temp11 tempgrp    0 ноя  8 14:42 f3
+
+Просмотр прав  доступа к объектам можно реализовать командой stat
+stat ./
+  Файл: ./
+  Размер: 4096      	Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d	Инода: 934485      Ссылки: 3
+Доступ: (0750/drwxr-x---)  Uid: ( 1011/  temp11)   Gid: ( 1015/  temp11)
+
+
+Создание объектов администратором и изменение прав доступа и владельце объектов
+
+
+1. Создание папки администратором
+sudo mkdir <полное имя папки>
+student@alexander-VirtualBox:~$ sudo mkdir /home/temp
+student@alexander-VirtualBox:/home/temp$ stat ./
+  Файл: ./
+  Размер: 4096      	Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d	Инода: 934468      Ссылки: 2
+Доступ: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+
+2. изменение владельца temp:
+sudo chown emp11::tempgrp /home/temp
+student@alexander-VirtualBox:/home/temp$ sudo chown temp11:tempgrp /home/temp
+student@alexander-VirtualBox:/home/temp$ stat ./
+  Файл: ./
+  Размер: 4096      	Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d	Инода: 934468      Ссылки: 2
+Доступ: (0755/drwxr-xr-x)  Uid: ( 1011/  temp11)   Gid: ( 1005/ tempgrp)
+
+
+3. Изменение прав доступа к папке temp:
+student@alexander-VirtualBox:/home/temp$ sudo chmod ug+w /home/temp
+temp12@alexander-VirtualBox:/home/temp$ stat F2
+  Файл: F2
+  Размер: 4096      	Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d	Инода: 952184      Ссылки: 2
+Доступ: (0775/drwxrwxr-x)  Uid: ( 1012/  temp12)   Gid: ( 1005/ tempgrp)
+Доступ:        2024-11-08 16:14:06.764372660 +0700
+Модифицирован: 2024-11-08 16:14:06.764372660 +0700
+Изменён:       2024-11-08 16:14:06.764372660 +0700
+Создан:        2024-11-08 16:14:06.764372660 +0700
+temp12@alexander-VirtualBox:/home/temp$ exit
+exit
+temp12@alexander-VirtualBox:/home/temp$ touch 6
+touch: невозможно выполнить touch для '6': Отказано в доступе
+temp12@alexander-VirtualBox:/home/temp$ cd F1
+temp12@alexander-VirtualBox:/home/temp/F1$ touch f1
+
+temp11@alexander-VirtualBox:/home/temp$ ls -l
+итого 4
+drwxrwxr-x 2 temp11 temp11 4096 ноя  8 15:59 F
+-rw-rw-r-- 1 temp11 temp11    0 ноя  8 15:59 f1
+-rw-rw-r-- 1 temp11 temp11    0 ноя  8 15:59 f2
+
+temp11@alexander-VirtualBox:/home/temp$ exit
+exit
+student@alexander-VirtualBox:/home/temp$ su temp12
+Пароль: 
+temp12@alexander-VirtualBox:/home/temp$ touch f4
+touch: невозможно выполнить touch для 'f4': Отказано в доступе
+
+temp12@alexander-VirtualBox:/home/temp$ newgrp tempgrp
+Пароль: 
+temp12@alexander-VirtualBox:/home/temp$ touch f5
+temp12@alexander-VirtualBox:/home/temp$ cat > f5
+privetik
+priyatno
+och veselo
+
+Специальные биты доступа к файлам и папкам (устанавливает админ)
+1. SUID - позволяет запускать прогрмму от имени владельца
+sudo chmod u+s <имя файла>
+2. GUID - устанавливает правила зауска от группы для файла и устанавливает правила наследования группы для папок
+sudo chmod g+s <имя файла или имя папок>
+
+3. Sticky bit - устанавливает запрещение на удаление объектов в папке
+sudo chmod o+t <имя папки>
+
+
+
+
+
+
